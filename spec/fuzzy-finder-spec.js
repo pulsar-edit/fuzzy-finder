@@ -35,12 +35,6 @@ describe('FuzzyFinder', () => {
   let fuzzyFinder, projectView, bufferView, gitStatusView, workspaceElement, fixturesPath
 
   beforeEach(async () => {
-    reporterStub = {
-      addTiming: sinon.spy(),
-      incrementCounter: () => {}
-    }
-    disposable = fuzzyFinderPackage.consumeMetricsReporter(reporterStub)
-
     const ancestorDir = fs.realpathSync(temp.mkdirSync())
     rootDir1 = path.join(ancestorDir, 'root-dir1')
     rootDir2 = path.join(ancestorDir, 'root-dir2')
@@ -1705,73 +1699,6 @@ describe('FuzzyFinder', () => {
               expect(Array.from(projectView.element.querySelectorAll('li')).find(a => a.textContent.includes('ignored.txt'))).toBeDefined()
             })
           })
-        })
-
-        describe('logging of metrics events', () => {
-          it('logs the crawling time', async () => {
-            // After setting the reporter it may receive some old events from previous tests
-            // that we want to discard.
-            reporterStub.addTiming.resetHistory()
-
-            await projectView.toggle()
-
-            await waitForPathsToDisplay(projectView)
-
-            expect(reporterStub.addTiming.firstCall.args[0]).toEqual('fuzzy-finder-v1')
-            expect(reporterStub.addTiming.firstCall.args[2]).toEqual(
-              {ec: 'time-to-crawl', el: useRipGrep ? 'ripgrep' : 'fs', ev: 5}
-            )
-          })
-
-          it('queues the events until a reporter is set', async () => {
-            // After setting the reporter it may receive some old events from previous tests
-            // that we want to discard.
-            reporterStub.addTiming.resetHistory()
-
-            await projectView.toggle()
-
-            await waitForPathsToDisplay(projectView)
-
-            fuzzyFinderPackage.consumeMetricsReporter(reporterStub)
-
-            expect(reporterStub.addTiming.firstCall.args[0]).toEqual('fuzzy-finder-v1')
-            expect(reporterStub.addTiming.firstCall.args[2]).toEqual(
-              {ec: 'time-to-crawl', el: useRipGrep ? 'ripgrep' : 'fs', ev: 5}
-            )
-          })
-
-          // We're not logging events when using the standard scoring system (since that one
-          // is not controlled by the fuzzy-finder).
-          if (scoringSystem !== 'standard') {
-            it('logs the filtering time', async () => {
-              const reporterStub = {
-                addTiming: sinon.spy()
-              }
-
-              disposable = fuzzyFinderPackage.consumeMetricsReporter(reporterStub)
-
-              await projectView.toggle()
-              await waitForPathsToDisplay(projectView)
-
-              // After setting the reporter it may receive some old events from previous tests
-              // that we want to discard.
-              reporterStub.addTiming.resetHistory()
-
-              projectView.selectListView.refs.queryEditor.setText('anything')
-              await getOrScheduleUpdatePromise()
-
-              expect(reporterStub.addTiming.lastCall.args[0]).toEqual('fuzzy-finder-v1')
-              expect(reporterStub.addTiming.lastCall.args[2]).toEqual(
-                {ec: 'time-to-filter', el: scoringSystem, ev: 5}
-              )
-
-              // Check that events are throttled
-              await projectView.selectListView.refs.queryEditor.setText('anything else')
-              await getOrScheduleUpdatePromise()
-
-              expect(reporterStub.addTiming.getCalls().length).toBe(1)
-            })
-          }
         })
       })
 
