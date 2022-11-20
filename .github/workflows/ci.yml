@@ -19,7 +19,7 @@ jobs:
         uses: pulsar-edit/action-pulsar-dependency@v2.1
         with:
           package-to-test: "fuzzy-finder"
-      - name: Gun the Headless Pulsar Tests 
+      - name: Run the Headless Pulsar Tests 
         uses: GabrielBB/xvfb-action@v1
         with:
           run: yarn start --test spec
