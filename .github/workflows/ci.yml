@@ -1,26 +1,34 @@
-name: Pulsar Dependency CI
-
+name: "CI"
 on:
-  - push
-  - pull_request
+  pull_request:
+  push:
+    branches:
+      - master
 
 jobs:
-  test:
-    name: Test 
+  Test:
     strategy:
-      matrix:
-        os: [ubuntu-20.04, macos-latest, windows-2019]
       fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-2019]
     runs-on: ${{ matrix.os }}
     steps:
-      - name: Checkout the Latest Package Code 
-        uses: actions/checkout@v3
-      - name: Setup Pulsar Editor
-        uses: pulsar-edit/action-pulsar-dependency@v2.1
-        with:
-          package-to-test: "fuzzy-finder"
-      - name: Gun the Headless Pulsar Tests 
-        uses: GabrielBB/xvfb-action@v1
-        with:
-          run: yarn start --test spec
-          working-directory: ./pulsar
+    - uses: actions/checkout@v3
+
+    - name: Install Pulsar
+      uses: pulsar-edit/action-pulsar-dependency@v3.2
+
+    - name: Install dependencies (Windows)
+      if: ${{ runner.os == 'Windows' }}
+      # Currently the Pulsar process starts, but unlike *nix doesn't wait for ppm to finish, probably because pulsar.cmd needs updated
+      # So we'll fallback to ppm (still named apm) instead
+      run: apm install --verbose
+
+    - name: Install dependencies (*nix)
+      if: ${{ runner.os != 'Windows' }}
+      run: pulsar --package install --verbose
+
+    - name: Run the headless Pulsar Tests
+      uses: coactions/setup-xvfb@v1.0.1
+      with:
+        run: pulsar --test spec
