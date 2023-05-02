@@ -18,22 +18,7 @@
     "wrench": "^1.5"
   },
   "devDependencies": {
-    "sinon": "9.0.3",
-    "standard": "^10.0.3"
-  },
-  "standard": {
-    "env": {
-      "atomtest": true,
-      "browser": true,
-      "jasmine": true,
-      "node": true
-    },
-    "globals": [
-      "atom"
-    ],
-    "ignore": [
-      "spec/fixtures"
-    ]
+    "sinon": "9.0.3"
   },
   "engines": {
     "atom": "*"
