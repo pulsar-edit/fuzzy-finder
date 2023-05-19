@@ -1,3 +1,5 @@
+# This repo is now archived under Pulsar-Edit as it is Bundled into the core editor [#515](https://github.com/pulsar-edit/pulsar/pull/515)
+
 # Fuzzy Finder package
 
 Quickly find and open files using <kbd>cmd-t</kbd>.
